@@ -10,7 +10,7 @@ public class Controller {
 	@GetMapping("/welcome/{name}")
 	public String welcome(@PathVariable("name") String name)
 	{
-		return name+" ,Welcome to kalyug!";
+		return name+" ,Welcome to kalyugggg!";
 		
 	}
 
