@@ -1,0 +1,62 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'Maven 3.9.6'     
+        jdk 'jdk-17'            
+    }
+
+    environment {
+        SONARQUBE_TOKEN = credentials('springbootapp-token')
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/shosi19/Demo.git'
+            }
+        }
+
+        stage('Build and Test') {
+            steps {
+                dir('demo') {
+                    sh 'mvn clean install'
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('MySonarQube') {
+                    dir('demo') {
+                        sh '''
+                        mvn sonar:sonar \
+                          -Dsonar.projectKey=SpringBootApp \
+                          -Dsonar.projectName=SpringBootApp \
+                          -Dsonar.projectVersion=1.0 \
+                          -Dsonar.java.binaries=target/classes \
+                          -Dsonar.sources=src/main/java
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Deploy WAR to Tomcat') {
+            steps {
+                dir('demo') {
+                    sh '''
+                    curl --upload-file target/*.war "http://admin:admin123@localhost:5050/manager/text/deploy?path=/SpringBootApp&update=true"
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline Completed!'
+        }
+    }
+}
