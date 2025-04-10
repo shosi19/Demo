@@ -8,10 +8,26 @@ import org.springframework.web.bind.annotation.RestController;
 public class Controller {
 
 	@GetMapping("/welcome/{name}")
-	public String welcome(@PathVariable("name") String name)
-	{
-		return "Hi "+name+" ,Welcome to My world!";
-		
+	public String welcome(@PathVariable("name") String name) {
+
+		// Unused variable
+		String unused = "This is not used";
+
+		// Null check
+		if (name == null) {
+			return "Name is missing!";
+		}
+
+		return "Hi " + name + ", Welcome to My world!";
 	}
+
+	// hardcoded password
+	public boolean isAuthorized(String password) {
+		if (password.equals("admin123")) {
+			return true;
+		}
+		return false;
+	}
+
 
 }
