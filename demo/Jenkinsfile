@@ -74,13 +74,13 @@ pipeline {
     // Post actions for notifications
     post {
         success {
-            mail to: 'your-email@example.com',
+            mail to: 'shipra.shipra@soprasteria.com',
                  subject: "Jenkins Build Success: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
                  body: "Build ${env.BUILD_NUMBER} was successful!"
         }
 
         failure {
-            mail to: 'your-email@example.com',
+            mail to: 'shipra.shipra@soprasteria.com',
                  subject: "Jenkins Build Failed: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
                  body: "Build ${env.BUILD_NUMBER} failed. Please check the Jenkins console output."
         }
