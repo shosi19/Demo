@@ -11,7 +11,7 @@ public class Controller {
 	public String welcome(@PathVariable("name") String name) {
 
 		// Unused variable
-		String unused = "This is not used";
+		final String unused = "This is not used";
 
 		// Null check
 		if (name == null) {
