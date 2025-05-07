@@ -1,92 +1,42 @@
-pipeline {
-    agent any
-
-    environment {
-        SONARQUBE_TOKEN = credentials('springbootapp-token')  // Replace with your actual SonarQube credentials
+stage('Build and Test') {
+    steps {
+        dir('demo') {
+            sh 'mvn clean install'
+        }
     }
+}
 
-    triggers {
-        // Polls Git repository every minute for changes
-        pollSCM('* * * * *') // Every minute (you can adjust the schedule)
-    }
-
-    stages {
-
-        // Stage 1: Checkout Code
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
-        // Stage 2: Build & Test
-        stage('Build and Test') {
-            steps {
-                script {
-                    // Run mvn clean install to build and test the project
-                    sh 'mvn clean install'
-                }
-            }
-        }
-
-        // Stage 3: SonarQube Analysis
-        stage('SonarQube Analysis') {
-            steps {
-                script {
-                    // Perform SonarQube analysis
-                    withSonarQubeEnv('MySonarQube') {
-                        sh '''
-                            mvn sonar:sonar \
-                            -Dsonar.projectKey=SpringBootApp \
-                            -Dsonar.projectName=SpringBootApp \
-                            -Dsonar.projectVersion=1.0 \
-                            -Dsonar.java.binaries=target/classes \
-                            -Dsonar.sources=src/main/java
-                        '''
-                    }
-                }
-            }
-        }
-
-        // Stage 4: Checkstyle
-        stage('Checkstyle') {
-            steps {
-                script {
-                    // Run Checkstyle for code style validation
-                    sh 'mvn checkstyle:check'
-                }
-            }
-        }
-
-        // Stage 5: Deploy to Tomcat
-        stage('Deploy WAR to Tomcat') {
-            steps {
-                script {
-                    // Deploy the WAR file to Tomcat
-                    sh '''
-                        curl --upload-file target/*.war "http://admin:admin123@localhost:5050/manager/text/deploy?path=/SpringBootApp&update=true"
-                    '''
-                }
+stage('SonarQube Analysis') {
+    steps {
+        withSonarQubeEnv('MySonarQube') {
+            dir('demo') {
+                sh '''
+                mvn sonar:sonar \
+                  -Dsonar.projectKey=SpringBootApp \
+                  -Dsonar.projectName=SpringBootApp \
+                  -Dsonar.projectVersion=1.0 \
+                  -Dsonar.java.binaries=target/classes \
+                  -Dsonar.sources=src/main/java
+                '''
             }
         }
     }
+}
 
-    // Post actions for notifications
-    post {
-        success {
-            mail to: 'shipra.shipra@soprasteria.com',
-                 subject: "Jenkins Build Success: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
-                 body: "Build ${env.BUILD_NUMBER} was successful!"
+stage('Checkstyle') {
+    steps {
+        dir('demo') {
+            sh 'mvn checkstyle:check'
         }
+    }
+}
 
-        failure {
-            mail to: 'shipra.shipra@soprasteria.com',
-                 subject: "Jenkins Build Failed: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
-                 body: "Build ${env.BUILD_NUMBER} failed. Please check the Jenkins console output."
-        }
-
-        always {
-            echo 'Pipeline completed.'
+stage('Deploy WAR to Tomcat') {
+    steps {
+        dir('demo') {
+            sh '''
+            curl --upload-file target/*.war "http://admin:admin123@localhost:5050/manager/text/deploy?path=/SpringBootApp&update=true"
+            '''
         }
     }
 }
