@@ -46,6 +46,7 @@ pipeline {
                 dir('demo') {
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                         sh 'mvn checkstyle:check'
+                    }
                 }
             }
         }
